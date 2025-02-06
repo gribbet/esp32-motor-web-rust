@@ -15,8 +15,7 @@ fn main() -> ! {
 
     println!("Hello world!");
 
-    let mut led = Output::new(peripherals.GPIO7, Level::Low);
-    led.set_high();
+    let mut led = Output::new(peripherals.GPIO7, Level::High);
 
     let delay = Delay::new();
 
