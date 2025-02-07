@@ -4,14 +4,20 @@ name = "esp32-test"
 version = "0.1.0"
 
 [dependencies]
-blocking-network-stack = {git = "https://github.com/bjoernQ/blocking-network-stack.git", rev = "b3ecefc222d8806edd221f266999ca339c52d34e"}
+embassy-executor = {version = "0.7", features = ["task-arena-size-20480"]}
+embassy-net = {version = "0.6", features = ["tcp", "udp", "dhcpv4", "medium-ethernet"]}
+embassy-time = "0.4"
+embedded-io-async = "0.6"
 esp-alloc = "0.6"
 esp-backtrace = {version = "0.15", features = ["exception-handler", "panic-handler", "println"]}
 esp-hal = {version = "0.23", features = ["unstable"]}
+esp-hal-embassy = "0.6"
 esp-println = {version = "0.13", features = ["log"]}
 esp-wifi = {version = "0.12", features = ["wifi", "utils"]}
 log = "0.4"
+rand_core = "0.6"
 smoltcp = {version = "0.12", default-features = false, features = ["medium-ethernet", "socket-raw"]}
+static_cell = "2.1"
 
 [features]
-default = ["esp-backtrace/esp32c3", "esp-println/esp32c3", "esp-wifi/esp32c3"]
+default = ["esp-backtrace/esp32c3", "esp-println/esp32c3", "esp-wifi/esp32c3", "esp-hal-embassy/esp32c3"]
