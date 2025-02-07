@@ -1,14 +1,17 @@
 [package]
+edition = "2021"
 name = "esp32-test"
 version = "0.1.0"
-edition = "2021"
 
 [dependencies]
-esp-hal = { version = "0.23.1", features = ["esp32c3"] }
-esp-backtrace = { version = "0.15.0", features = [
-    "esp32c3",
-    "panic-handler",
-    "exception-handler",
-    "println",
-] }
-esp-println = { version = "0.13.0", features = ["esp32c3"] }
+blocking-network-stack = {git = "https://github.com/bjoernQ/blocking-network-stack.git", rev = "b3ecefc222d8806edd221f266999ca339c52d34e"}
+esp-alloc = "0.6"
+esp-backtrace = {version = "0.15", features = ["exception-handler", "panic-handler", "println"]}
+esp-hal = {version = "0.23", features = ["unstable"]}
+esp-println = {version = "0.13", features = ["log"]}
+esp-wifi = {version = "0.12", features = ["wifi", "utils"]}
+log = "0.4"
+smoltcp = {version = "0.12", default-features = false, features = ["medium-ethernet", "socket-raw"]}
+
+[features]
+default = ["esp-backtrace/esp32c3", "esp-println/esp32c3", "esp-wifi/esp32c3"]
