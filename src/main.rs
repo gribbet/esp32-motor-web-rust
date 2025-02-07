@@ -4,7 +4,6 @@
 extern crate alloc;
 
 use blocking_network_stack::Stack;
-use esp_alloc as _;
 use esp_backtrace as _;
 use esp_hal::clock::CpuClock;
 use esp_hal::rng::Rng;
