@@ -5,7 +5,7 @@
 use embassy_executor::Spawner;
 use embassy_net::Stack;
 use embassy_net::{Runner, StackResources};
-use embassy_time::Duration;
+use embassy_time::{Duration, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
 use esp_hal::clock::CpuClock;
@@ -18,10 +18,13 @@ use esp_wifi::wifi::{
     self, ClientConfiguration, Configuration, WifiDevice, WifiError, WifiStaDevice,
 };
 use esp_wifi::EspWifiController;
+use led::LedController;
 use picoserve::routing::get;
 use picoserve::AppBuilder;
 use picoserve::{make_static, AppRouter};
 use rand_core::RngCore;
+
+mod led;
 
 const WEB_TASK_POOL_SIZE: usize = 8;
 
@@ -42,7 +45,6 @@ impl AppBuilder for AppProps {
 #[esp_hal_embassy::main]
 async fn main(spawner: Spawner) {
     esp_println::logger::init_logger_from_env();
-
     esp_alloc::heap_allocator!(72 * 1024);
 
     run(spawner)
@@ -52,6 +54,9 @@ async fn main(spawner: Spawner) {
 
 async fn run(spawner: Spawner) -> Result<(), WifiError> {
     let peripherals = esp_hal::init(Config::default().with_cpu_clock(CpuClock::max()));
+
+    esp_hal_embassy::init(SystemTimer::new(peripherals.SYSTIMER).alarm0);
+
     let timg0 = TimerGroup::new(peripherals.TIMG0);
     let mut rng = Rng::new(peripherals.RNG);
 
@@ -63,8 +68,6 @@ async fn run(spawner: Spawner) -> Result<(), WifiError> {
         peripherals.WIFI,
         WifiStaDevice,
     )?;
-
-    esp_hal_embassy::init(SystemTimer::new(peripherals.SYSTIMER).alarm0);
 
     let (stack, runner) = embassy_net::new(
         wifi,
@@ -85,7 +88,9 @@ async fn run(spawner: Spawner) -> Result<(), WifiError> {
     controller.start_async().await?;
 
     println!("Connecting...");
-    controller.connect_async().await?;
+    while controller.connect_async().await.is_err() {
+        Timer::after(Duration::from_millis(5)).await;
+    }
 
     println!("Waiting for IP...");
     stack.wait_config_up().await;
@@ -113,6 +118,16 @@ async fn run(spawner: Spawner) -> Result<(), WifiError> {
 
     for id in 0..WEB_TASK_POOL_SIZE {
         spawner.must_spawn(web_task(id, stack, app, config));
+    }
+
+    let controller = LedController::new(peripherals.LEDC);
+    let led = controller.led(peripherals.GPIO7);
+
+    let mut i = 0u32;
+    while i < 100000 {
+        led.set((i % 100) as u8);
+        i += 1;
+        Timer::after(Duration::from_millis(5)).await;
     }
 
     Ok(())
