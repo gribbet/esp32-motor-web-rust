@@ -10,9 +10,11 @@ use esp_hal::clock::CpuClock;
 use esp_hal::timer::systimer::SystemTimer;
 use esp_hal::Config;
 use led::LedController;
-use server::start;
+use net::create_stack;
+use server::start_server;
 
 mod led;
+mod net;
 mod server;
 
 #[esp_hal_embassy::main]
@@ -24,7 +26,7 @@ async fn main(spawner: Spawner) {
 
     esp_hal_embassy::init(SystemTimer::new(peripherals.SYSTIMER).alarm0);
 
-    start(
+    let stack = create_stack(
         spawner,
         peripherals.TIMG0,
         peripherals.RNG,
@@ -33,6 +35,8 @@ async fn main(spawner: Spawner) {
     )
     .await
     .unwrap_or_else(|error| panic!("{:?}", error));
+
+    start_server(spawner, stack).await;
 
     let controller = LedController::new(peripherals.LEDC);
     let led = controller.led(peripherals.GPIO7);
