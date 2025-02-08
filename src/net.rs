@@ -25,14 +25,11 @@ pub async fn create_stack<'d>(
     let timg0 = TimerGroup::new(timg0);
     let mut rng = Rng::new(rng);
 
-    let (wifi, mut controller) = wifi::new_with_mode(
-        make_static!(
-            EspWifiController<'_>,
-            esp_wifi::init(timg0.timer0, rng, radio_clk).unwrap()
-        ),
-        wifi,
-        WifiStaDevice,
-    )?;
+    let init = make_static!(
+        EspWifiController<'_>,
+        esp_wifi::init(timg0.timer0, rng, radio_clk).unwrap()
+    );
+    let (wifi, mut controller) = wifi::new_with_mode(init, wifi, WifiStaDevice)?;
 
     let (stack, runner) = embassy_net::new(
         wifi,

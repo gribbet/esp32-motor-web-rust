@@ -18,7 +18,6 @@ impl AppBuilder for AppProps {
 
     fn build_app(self) -> Router<Self::PathRouter> {
         let Self { message } = self;
-
         Router::new().route("/", get(move || async move { message }))
     }
 }
