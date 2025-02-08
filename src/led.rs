@@ -14,7 +14,7 @@ pub struct LedController<'d> {
 }
 
 impl<'d> LedController<'d> {
-    pub fn new(ledc: impl Peripheral<P = LEDC> + 'd) -> Self {
+    pub fn new(ledc: LEDC) -> Self {
         let ledc = Ledc::new(ledc);
         let mut timer = ledc.timer(timer::Number::Timer0);
         timer
