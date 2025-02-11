@@ -3,7 +3,6 @@
 #![feature(impl_trait_in_assoc_type)]
 
 use embassy_executor::Spawner;
-use embassy_time::{Duration, Timer};
 use esp_alloc as _;
 use esp_backtrace as _;
 use esp_hal::clock::CpuClock;
@@ -11,6 +10,7 @@ use esp_hal::timer::systimer::SystemTimer;
 use esp_hal::Config;
 use led::LedController;
 use net::create_stack;
+use picoserve::make_static;
 use server::start_server;
 
 mod led;
@@ -36,15 +36,8 @@ async fn main(spawner: Spawner) {
     .await
     .unwrap_or_else(|error| panic!("{:?}", error));
 
-    start_server(spawner, stack).await;
-
-    let controller = LedController::new(peripherals.LEDC);
+    let controller = make_static!(LedController, LedController::new(peripherals.LEDC));
     let led = controller.led(peripherals.GPIO7);
 
-    let mut i = 0u32;
-    while i < 100000 {
-        led.set((i % 100) as u8);
-        i += 1;
-        Timer::after(Duration::from_millis(5)).await;
-    }
+    start_server(spawner, stack, led).await;
 }

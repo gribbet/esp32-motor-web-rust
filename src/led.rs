@@ -33,6 +33,7 @@ impl<'d> LedController<'d> {
 }
 
 pub struct Led<'d> {
+    value: u8,
     channel: Channel<'d, LowSpeed>,
 }
 
@@ -49,10 +50,15 @@ impl<'d> Led<'d> {
                 pin_config: PinConfig::PushPull,
             })
             .unwrap();
-        Self { channel }
+        Self { channel, value: 0 }
     }
 
-    pub fn set(&self, value: u8) {
+    pub fn get_brightness(&self) -> u8 {
+        self.value
+    }
+
+    pub fn set_brightness(&mut self, value: u8) {
         self.channel.set_duty(value).unwrap();
+        self.value = value;
     }
 }
