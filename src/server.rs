@@ -53,8 +53,7 @@ pub async fn start_server(spawner: Spawner, stack: Stack<'static>, led: Led<'sta
     );
 
     let app = make_static!(AppRouter<App>, App {}.build_app());
-    let led =
-        SharedLed(make_static!(Mutex<CriticalSectionRawMutex, Led<'static>>, Mutex::new(led)));
+    let led = SharedLed(make_static!(Mutex<CriticalSectionRawMutex, Led<'_>>, Mutex::new(led)));
 
     for id in 0..WEB_TASK_POOL_SIZE {
         spawner.must_spawn(web_task(id, stack, app, config, led));
