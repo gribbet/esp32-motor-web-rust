@@ -37,7 +37,7 @@ async fn main(spawner: Spawner) {
     .unwrap_or_else(|error| panic!("{:?}", error));
 
     let controller = make_static!(LedController, LedController::new(peripherals.LEDC));
-    let led = controller.led(peripherals.GPIO7);
+    let led = controller.led(peripherals.GPIO8);
 
     start_server(spawner, stack, led).await;
 }

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>LED Control</title>
+    <script>
+        const get = async () => {
+            const response = await fetch("/brightness");
+            return parseInt(await response.json());
+        }
+
+        let next;
+        let setting = Promise.resolve();
+        const set = async (value) => {
+            await setting;
+            if (next) clearTimeout(next);
+            next = setTimeout(() => {
+                setting = new Promise(async resolve =>
+                    resolve(await fetch("/brightness", { method: "POST", body: JSON.stringify(value) })));
+            });
+        };
+
+        window.addEventListener("load", async () => {
+            const range = document.getElementById("range");
+            range.value = await get();
+            range.addEventListener("input", event => {
+                event.preventDefault();
+                set(parseInt(event.target.value));
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <input type="range" min="0" max="100" id="range" />
+</body>
+
+</html>
