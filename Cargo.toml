@@ -23,3 +23,6 @@ static_cell = "2.1"
 
 [features]
 default = ["esp-backtrace/esp32c3", "esp-println/esp32c3", "esp-wifi/esp32c3", "esp-hal-embassy/esp32c3"]
+
+[profile.dev]
+opt-level = 3
