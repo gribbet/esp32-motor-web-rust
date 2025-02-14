@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "esp32-test"
+name = "esp32-motor-web-rust"
 version = "0.1.0"
 
 [dependencies]
