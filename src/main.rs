@@ -8,12 +8,12 @@ use esp_backtrace as _;
 use esp_hal::clock::CpuClock;
 use esp_hal::timer::systimer::SystemTimer;
 use esp_hal::Config;
-use led::LedController;
+use motor::MotorController;
 use net::create_stack;
 use picoserve::make_static;
 use server::start_server;
 
-mod led;
+mod motor;
 mod net;
 mod server;
 
@@ -26,6 +26,9 @@ async fn main(spawner: Spawner) {
 
     esp_hal_embassy::init(SystemTimer::new(peripherals.SYSTIMER).alarm0);
 
+    let controller = make_static!(MotorController, MotorController::new(peripherals.LEDC));
+    let motor = controller.motor(peripherals.GPIO5, peripherals.GPIO6);
+
     let stack = create_stack(
         spawner,
         peripherals.TIMG0,
@@ -36,8 +39,5 @@ async fn main(spawner: Spawner) {
     .await
     .unwrap_or_else(|error| panic!("{:?}", error));
 
-    let controller = make_static!(LedController, LedController::new(peripherals.LEDC));
-    let led = controller.led(peripherals.GPIO8);
-
-    start_server(spawner, stack, led).await;
+    start_server(spawner, stack, motor).await;
 }
